@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NekoIoT Bento Dashboard — Muhammad Khisbu Risky</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            mist: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+            },
+            latte: {
+              sky: '#0284c7',
+              indigo: '#4f46e5',
+              amber: '#ea580c',
+              green: '#16a34a',
+              teal: '#0d9488',
+              blue: '#2563eb',
+              text: '#1e293b',
+              subtext: '#64748b',
+            },
+            mocha: {
+              base: '#1e1e2e',
+              mantle: '#181825',
+              surface0: '#313244',
+              surface1: '#45475a',
+              text: '#cdd6f4',
+              subtext: '#a6adc8',
+              sky: '#89dceb',
+              indigo: '#89b4fa',
+              peach: '#fab387',
+              green: '#a6e3a1',
+              teal: '#94e2d5',
+              blue: '#74c7ec',
+            }
+          },
+          boxShadow: {
+            'diffused': '0 14px 36px -8px rgba(30, 41, 59, 0.10), 0 4px 14px -4px rgba(30, 41, 59, 0.05)',
+            'diffused-dark': '0 14px 36px -8px rgba(0, 0, 0, 0.45), 0 4px 14px -4px rgba(0, 0, 0, 0.3)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    .bg-neko-light {
+      background-color: #f4f7fb;
+      background-image:
+        radial-gradient(at 10% 10%, rgba(186, 230, 253, 0.55) 0px, transparent 50%),
+        radial-gradient(at 90% 15%, rgba(199, 210, 254, 0.45) 0px, transparent 50%),
+        radial-gradient(at 80% 85%, rgba(254, 215, 170, 0.32) 0px, transparent 50%),
+        radial-gradient(at 15% 85%, rgba(153, 246, 228, 0.32) 0px, transparent 50%);
+    }
+
+    .dark .bg-neko-light {
+      background-color: #181825;
+      background-image:
+        radial-gradient(at 10% 10%, rgba(116, 199, 236, 0.14) 0px, transparent 50%),
+        radial-gradient(at 90% 15%, rgba(137, 180, 250, 0.13) 0px, transparent 50%),
+        radial-gradient(at 80% 85%, rgba(250, 179, 135, 0.10) 0px, transparent 50%),
+        radial-gradient(at 15% 85%, rgba(148, 226, 213, 0.10) 0px, transparent 50%);
+    }
+
+    .bento-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(203, 213, 225, 0.65);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background-color 0.35s ease, border-color 0.35s ease;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .dark .bento-card {
+      background: rgba(30, 30, 46, 0.76);
+      border: 1.5px solid rgba(137, 180, 250, 0.18);
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(-4deg); }
+      50% { transform: translateY(-8px) rotate(4deg); }
+    }
+
+    @keyframes floatReverse {
+      0%, 100% { transform: translateY(0px) rotate(5deg); }
+      50% { transform: translateY(-7px) rotate(-3deg); }
+    }
+
+    .sticker-float {
+      animation: floatSlow 5s ease-in-out infinite;
+    }
+
+    .sticker-float-rev {
+      animation: floatReverse 6s ease-in-out infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: rgba(137, 180, 250, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-neko-light text-latte-text dark:text-mocha-text min-h-screen relative overflow-x-hidden selection:bg-sky-500/20">
+
+  <div class="pointer-events-none fixed top-24 left-4 z-0 opacity-85 hidden xl:block sticker-float" aria-hidden="true">
+    <div class="bg-white/85 dark:bg-mocha-surface0/85 backdrop-blur-md p-2.5 rounded-2xl shadow-diffused border border-slate-200/80 dark:border-mocha-indigo/20 text-2xl">
+      🐱💤
+    </div>
+  </div>
+  <div class="pointer-events-none fixed bottom-10 right-6 z-0 opacity-85 hidden xl:block sticker-float-rev" aria-hidden="true">
+    <div class="bg-white/85 dark:bg-mocha-surface0/85 backdrop-blur-md p-2.5 rounded-2xl shadow-diffused border border-sky-200/80 dark:border-mocha-sky/20 text-2xl">
+      🐾⚡
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+
+    <header class="bento-card rounded-3xl p-5 sm:p-7 shadow-diffused dark:shadow-diffused-dark mb-6 relative overflow-hidden">
+      <div class="pointer-events-none absolute -right-4 -bottom-6 opacity-[0.06] dark:opacity-[0.08] text-latte-sky dark:text-mocha-indigo">
+        <i data-lucide="paw-print" class="w-40 h-40"></i>
+      </div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 relative z-10">
+        <div class="flex items-center gap-4 sm:gap-5">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-sky-100 via-slate-100 to-indigo-100 dark:from-mocha-surface0 dark:to-mocha-surface1 flex items-center justify-center shadow-inner border border-white/90 dark:border-mocha-indigo/30 shrink-0 group">
+            <svg class="w-12 h-12 sm:w-14 sm:h-14 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 33L13 13L31 23C33.8 22.2 36.8 21.8 40 21.8C43.2 21.8 46.2 22.2 49 23L67 13L62 33C65.2 37.3 67 42.5 67 48.2C67 61.5 55 69 40 69C25 69 13 61.5 13 48.2C13 42.5 14.8 37.3 18 33Z" fill="#F8FAFC" stroke="#475569" stroke-width="2.8" stroke-linejoin="round"/>
+              <path d="M20 27L17.5 17.5L27 22.5" fill="#93C5FD"/>
+              <path d="M60 27L62.5 17.5L53 22.5" fill="#93C5FD"/>
+              <path d="M36 22V28M40 21.8V29M44 22V28" stroke="#64748B" stroke-width="2.4" stroke-linecap="round"/>
+              <circle cx="30" cy="44" r="4.2" fill="#1E293B"/>
+              <circle cx="50" cy="44" r="4.2" fill="#1E293B"/>
+              <circle cx="31.5" cy="42.5" r="1.4" fill="#FFFFFF"/>
+              <circle cx="51.5" cy="42.5" r="1.4" fill="#FFFFFF"/>
+              <ellipse cx="22" cy="50" rx="4.5" ry="2.4" fill="#BAE6FD" opacity="0.85"/>
+              <ellipse cx="58" cy="50" rx="4.5" ry="2.4" fill="#BAE6FD" opacity="0.85"/>
+              <path d="M37.5 49L40 51.5L42.5 49H37.5Z" fill="#F59E0B"/>
+              <path d="M34 54C36 56.5 38.5 56.5 40 53.5C41.5 56.5 44 56.5 46 54" stroke="#475569" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M10 45H18M10 51H18M62 45H70M62 51H70" stroke="#64748B" stroke-width="2.2" stroke-linecap="round"/>
+              <circle cx="40" cy="68" r="4.5" fill="#38BDF8" stroke="#0284C7" stroke-width="1.8"/>
+            </svg>
+          </div>
+
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-100/90 dark:bg-mocha-surface0 text-latte-sky dark:text-mocha-sky mb-1.5">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+              <span>Node-RED REST API &bull; MQTT Telemetry</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-latte-text dark:text-white">
+              NekoIoT Monitoring Dashboard
+            </h1>
+            <p class="text-xs sm:text-sm text-latte-subtext dark:text-mocha-subtext mt-0.5">
+              Pantauan suhu, kelembaban ruangan, dan kontrol aktuator real-time
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap sm:flex-nowrap items-center justify-between lg:justify-end gap-3">
+          <div class="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-mist-100/90 dark:bg-mocha-mantle/90 border border-slate-200/90 dark:border-mocha-indigo/25 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500/20 to-indigo-500/20 dark:from-mocha-sky/20 dark:to-mocha-indigo/20 flex items-center justify-center text-latte-indigo dark:text-mocha-indigo shrink-0">
+              <i data-lucide="id-card" class="w-5 h-5"></i>
+            </div>
+            <div class="leading-tight">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-latte-sky dark:text-mocha-sky block">
+                Profil Mahasiswa
+              </span>
+              <p class="text-sm font-bold text-latte-text dark:text-white">
+                Muhammad Khisbu Risky
+              </p>
+              <p class="text-xs font-semibold text-latte-subtext dark:text-mocha-subtext">
+                NPM: <span class="text-latte-indigo dark:text-mocha-indigo font-bold">2410020121</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            id="theme-toggle"
+            onclick="toggleTheme()"
+            aria-label="Ganti Tema Terang atau Gelap"
+            class="p-3.5 rounded-2xl bg-white/90 dark:bg-mocha-surface0 border border-slate-200/90 dark:border-mocha-indigo/25 shadow-sm hover:scale-105 active:scale-95 transition-all text-latte-text dark:text-mocha-peach cursor-pointer"
+            title="Ganti Mode Terang / Gelap"
+          >
+            <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+      <div class="bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark relative overflow-hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-orange-500/15 dark:bg-mocha-peach/15 flex items-center justify-center text-latte-amber dark:text-mocha-peach">
+              <i data-lucide="thermometer" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-latte-subtext dark:text-mocha-subtext">
+              Suhu Ruangan
+            </span>
+          </div>
+          <span class="p-2 rounded-xl bg-slate-100 dark:bg-mocha-surface0 text-latte-sky dark:text-mocha-sky" title="Cat Paw Sensor">
+            <i data-lucide="paw-print" class="w-4 h-4"></i>
+          </span>
+        </div>
+
+        <div class="flex items-baseline gap-2">
+          <span id="suhu" class="text-4xl sm:text-5xl font-extrabold text-latte-amber dark:text-mocha-peach tracking-tight">--</span>
+          <span class="text-lg font-bold text-latte-subtext dark:text-mocha-subtext">&deg;C</span>
+        </div>
+        <p class="text-xs text-latte-subtext dark:text-mocha-subtext mt-2 flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 opacity-70"></i>
+          <span>Update otomatis tiap 3 detik</span>
+        </p>
+      </div>
+
+      <div class="bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark relative overflow-hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-teal-500/15 dark:bg-mocha-teal/15 flex items-center justify-center text-latte-teal dark:text-mocha-teal">
+              <i data-lucide="droplets" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-latte-subtext dark:text-mocha-subtext">
+              Kelembaban
+            </span>
+          </div>
+          <span class="p-2 rounded-xl bg-slate-100 dark:bg-mocha-surface0 text-latte-sky dark:text-mocha-sky" title="Cat Paw Sensor">
+            <i data-lucide="paw-print" class="w-4 h-4"></i>
+          </span>
+        </div>
+
+        <div class="flex items-baseline gap-2">
+          <span id="kelembaban" class="text-4xl sm:text-5xl font-extrabold text-latte-teal dark:text-mocha-teal tracking-tight">--</span>
+          <span class="text-lg font-bold text-latte-subtext dark:text-mocha-subtext">%</span>
+        </div>
+        <p class="text-xs text-latte-subtext dark:text-mocha-subtext mt-2 flex items-center gap-1.5">
+          <i data-lucide="activity" class="w-3.5 h-3.5 opacity-70"></i>
+          <span>Sensor DHT22 Simulator</span>
+        </p>
+      </div>
+
+      <div class="bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark relative overflow-hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 dark:bg-mocha-indigo/15 flex items-center justify-center text-latte-indigo dark:text-mocha-indigo">
+              <i data-lucide="radio" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-latte-subtext dark:text-mocha-subtext">
+              Status Sensor
+            </span>
+          </div>
+          <span class="p-2 rounded-xl bg-slate-100 dark:bg-mocha-surface0 text-latte-sky dark:text-mocha-sky" title="Cat Paw Status">
+            <i data-lucide="paw-print" class="w-4 h-4"></i>
+          </span>
+        </div>
+
+        <div class="my-2">
+          <span
+            id="status-badge"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 transition-all"
+          >
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+            OFFLINE
+          </span>
+        </div>
+        <p class="text-xs text-latte-subtext dark:text-mocha-subtext mt-2.5 flex items-center gap-1.5">
+          <i data-lucide="server" class="w-3.5 h-3.5 opacity-70"></i>
+          <span>Mosquitto Lokal (localhost:1883)</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+      <div class="lg:col-span-7 bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-blue-500/15 dark:bg-mocha-blue/15 flex items-center justify-center text-latte-blue dark:text-mocha-blue">
+              <i data-lucide="line-chart" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-latte-text dark:text-white">
+                Grafik Telemetri Sensor
+              </h2>
+              <p class="text-xs text-latte-subtext dark:text-mocha-subtext">
+                Visualisasi 10 pembacaan terakhir suhu &amp; kelembaban
+              </p>
+            </div>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-mist-100 dark:bg-mocha-surface0 text-latte-subtext dark:text-mocha-subtext">
+            Real-time
+          </span>
+        </div>
+
+        <div class="relative w-full h-60 sm:h-64">
+          <canvas id="sensorChart"></canvas>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/15 dark:bg-yellow-400/15 flex items-center justify-center text-amber-600 dark:text-yellow-300">
+              <i data-lucide="lightbulb" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-latte-text dark:text-white">
+                Kontrol Perangkat Lampu
+              </h2>
+              <p class="text-xs text-latte-subtext dark:text-mocha-subtext">
+                Kirim perintah via <code class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-mist-100 dark:bg-mocha-surface0">POST /api/kontrol</code>
+              </p>
+            </div>
+          </div>
+
+          <div id="lamp-card-box" class="p-4 rounded-2xl bg-mist-100/90 dark:bg-mocha-mantle/80 border border-slate-200/80 dark:border-mocha-surface1 mb-5 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-3">
+              <div id="lamp-icon-wrap" class="w-11 h-11 rounded-2xl bg-slate-200/80 dark:bg-mocha-surface0 flex items-center justify-center text-slate-500 dark:text-mocha-subtext transition-all">
+                <i data-lucide="lamp-desk" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-latte-subtext dark:text-mocha-subtext">Status Aktuator</p>
+                <p id="lamp-status-text" class="text-sm font-extrabold text-latte-text dark:text-white">
+                  Menunggu Perintah
+                </p>
+              </div>
+            </div>
+            <span class="text-xl select-none" id="lamp-cat-reaction">🐱</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            onclick="kontrol('lamp', 'on')"
+            class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-105 active:scale-95 shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+          >
+            <i data-lucide="sun" class="w-4 h-4"></i>
+            <span>Nyalakan</span>
+          </button>
+
+          <button
+            onclick="kontrol('lamp', 'off')"
+            class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-slate-700 to-slate-800 hover:brightness-110 active:scale-95 shadow-md shadow-slate-700/20 transition-all cursor-pointer"
+          >
+            <i data-lucide="moon-star" class="w-4 h-4"></i>
+            <span>Matikan</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-7 bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-sky-500/15 dark:bg-mocha-sky/15 flex items-center justify-center text-latte-sky dark:text-mocha-sky">
+              <i data-lucide="history" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-latte-text dark:text-white">
+                10 Data Sensor Terakhir
+              </h2>
+              <p class="text-xs text-latte-subtext dark:text-mocha-subtext">
+                Riwayat terbaru dari <code class="font-mono text-[11px]">GET /api/history</code>
+              </p>
+            </div>
+          </div>
+          <i data-lucide="cat" class="w-5 h-5 text-latte-sky dark:text-mocha-sky opacity-80"></i>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-mocha-surface1">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-mist-100 dark:bg-mocha-mantle text-latte-subtext dark:text-mocha-subtext text-[11px] uppercase tracking-wider">
+                <th class="py-3 px-4 font-bold">Waktu</th>
+                <th class="py-3 px-4 font-bold">Suhu (&deg;C)</th>
+                <th class="py-3 px-4 font-bold">Kelembaban (%)</th>
+              </tr>
+            </thead>
+            <tbody id="history-body" class="divide-y divide-slate-200/60 dark:divide-mocha-surface0 text-sm">
+              <tr>
+                <td colspan="3" class="py-6 text-center text-latte-subtext dark:text-mocha-subtext text-xs">
+                  Memuat riwayat data sensor...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 bento-card rounded-3xl p-6 shadow-diffused dark:shadow-diffused-dark flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/15 dark:bg-mocha-green/15 flex items-center justify-center text-latte-green dark:text-mocha-green">
+              <i data-lucide="terminal" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-latte-text dark:text-white">
+                Log Aktivitas Sistem
+              </h2>
+              <p class="text-xs text-latte-subtext dark:text-mocha-subtext">
+                Catatan komunikasi REST API &amp; kontrol
+              </p>
+            </div>
+          </div>
+          <button
+            onclick="document.getElementById('log').innerHTML=''"
+            class="text-xs font-semibold px-2.5 py-1 rounded-xl bg-mist-100 dark:bg-mocha-surface0 text-latte-subtext dark:text-mocha-subtext hover:text-latte-sky transition-colors cursor-pointer"
+            title="Bersihkan Log"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div
+          id="log"
+          class="flex-1 bg-[#181825] text-[#a6e3a1] font-mono text-xs p-4 rounded-2xl max-h-64 min-h-[210px] overflow-y-auto space-y-1.5 leading-relaxed shadow-inner border border-mocha-surface0"
+        ></div>
+      </div>
+    </section>
+
+    <footer class="mt-8 text-center text-xs text-latte-subtext dark:text-mocha-subtext">
+      <p>
+        Tugas Praktek 9: REST API Node-RED &bull; Dibuat oleh
+        <strong class="text-latte-text dark:text-white">Muhammad Khisbu Risky</strong> (NPM: <strong class="text-latte-indigo dark:text-mocha-indigo">2410020121</strong>)
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const API_BASE = 'http://localhost:1880/api';
+
+    const ctx = document.getElementById('sensorChart').getContext('2d');
+    const sensorChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Suhu (°C)',
+            data: [],
+            borderColor: '#ea580c',
+            backgroundColor: 'rgba(234, 88, 12, 0.14)',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#ea580c'
+          },
+          {
+            label: 'Kelembaban (%)',
+            data: [],
+            borderColor: '#0d9488',
+            backgroundColor: 'rgba(13, 148, 136, 0.14)',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#0d9488'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            labels: {
+              usePointStyle: true,
+              boxWidth: 8,
+              color: '#1e293b',
+              font: {
+                family: "'Plus Jakarta Sans', sans-serif",
+                weight: '600',
+                size: 12
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#64748b',
+              font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
+            }
+          },
+          y: {
+            beginAtZero: false,
+            grid: { color: 'rgba(100, 116, 139, 0.12)' },
+            ticks: {
+              color: '#64748b',
+              font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
+            }
+          }
+        }
+      }
+    });
+
+    function updateChartTheme(isDark) {
+      const textColor = isDark ? '#cdd6f4' : '#1e293b';
+      const subTextColor = isDark ? '#a6adc8' : '#64748b';
+      const gridColor = isDark ? 'rgba(205, 214, 244, 0.08)' : 'rgba(100, 116, 139, 0.12)';
+
+      sensorChart.data.datasets[0].borderColor = isDark ? '#fab387' : '#ea580c';
+      sensorChart.data.datasets[0].pointBackgroundColor = isDark ? '#fab387' : '#ea580c';
+      sensorChart.data.datasets[1].borderColor = isDark ? '#94e2d5' : '#0d9488';
+      sensorChart.data.datasets[1].pointBackgroundColor = isDark ? '#94e2d5' : '#0d9488';
+
+      sensorChart.options.plugins.legend.labels.color = textColor;
+      sensorChart.options.scales.x.ticks.color = subTextColor;
+      sensorChart.options.scales.y.ticks.color = subTextColor;
+      sensorChart.options.scales.y.grid.color = gridColor;
+      sensorChart.update('none');
+    }
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle('dark');
+      const iconEl = document.getElementById('theme-icon');
+      iconEl.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      lucide.createIcons();
+      updateChartTheme(isDark);
+    }
+
+    function log(msg, type = 'info') {
+      const el = document.getElementById('log');
+      const time = new Date().toLocaleTimeString('id-ID');
+      const colorClass = type === 'error' ? 'text-[#fab387]' : 'text-[#a6e3a1]';
+      el.innerHTML += `<div class="${colorClass}"><span class="text-[#89b4fa]">[${time}]</span> ${msg}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function fetchSensor() {
+      try {
+        const res = await fetch(`${API_BASE}/suhu`);
+        const json = await res.json();
+        const badge = document.getElementById('status-badge');
+
+        if (json.status === 'success' && json.data && json.data.suhu !== null) {
+          document.getElementById('suhu').textContent = json.data.suhu;
+          document.getElementById('kelembaban').textContent = json.data.kelembaban;
+
+          badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span> ONLINE`;
+          badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-extrabold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 transition-all';
+        } else {
+          badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span> OFFLINE`;
+          badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 transition-all';
+        }
+      } catch (err) {
+        const badge = document.getElementById('status-badge');
+        badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span> OFFLINE`;
+        badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 transition-all';
+        log(`Gagal fetch sensor: ${err.message}`, 'error');
+      }
+    }
+
+    async function fetchHistory() {
+      try {
+        const res = await fetch(`${API_BASE}/history`);
+        const json = await res.json();
+        const tbody = document.getElementById('history-body');
+
+        if (!json.data || json.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="py-6 text-center text-latte-subtext dark:text-mocha-subtext text-xs">Belum ada data sensor masuk</td></tr>';
+          return;
+        }
+
+        const recentChronological = json.data.slice(-10);
+        sensorChart.data.labels = recentChronological.map(d =>
+          new Date(d.received).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        );
+        sensorChart.data.datasets[0].data = recentChronological.map(d => d.suhu);
+        sensorChart.data.datasets[1].data = recentChronological.map(d => d.kelembaban);
+        sensorChart.update('none');
+
+        const rows = [...recentChronological].reverse().map(d => `
+          <tr class="hover:bg-mist-100/80 dark:hover:bg-mocha-surface0/40 transition-colors">
+            <td class="py-2.5 px-4 font-medium text-latte-subtext dark:text-mocha-subtext">${new Date(d.received).toLocaleTimeString('id-ID')}</td>
+            <td class="py-2.5 px-4 font-bold text-latte-amber dark:text-mocha-peach">${d.suhu} &deg;C</td>
+            <td class="py-2.5 px-4 font-bold text-latte-teal dark:text-mocha-teal">${d.kelembaban} %</td>
+          </tr>
+        `).join('');
+
+        tbody.innerHTML = rows;
+      } catch (err) {
+        log(`Gagal fetch history: ${err.message}`, 'error');
+      }
+    }
+
+    async function kontrol(device, action) {
+      try {
+        const res = await fetch(`${API_BASE}/kontrol`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ device, action })
+        });
+        const json = await res.json();
+
+        if (json.status === 'success') {
+          log(`Perintah terkirim: ${device} -> ${action.toUpperCase()}`, 'info');
+          const statusText = document.getElementById('lamp-status-text');
+          const iconWrap = document.getElementById('lamp-icon-wrap');
+          const catReaction = document.getElementById('lamp-cat-reaction');
+
+          if (action === 'on') {
+            statusText.textContent = 'Lampu Menyala (ON)';
+            iconWrap.className = 'w-11 h-11 rounded-2xl bg-amber-400/25 text-amber-500 flex items-center justify-center shadow-sm shadow-amber-400/30 transition-all';
+            catReaction.textContent = '😺💡';
+          } else {
+            statusText.textContent = 'Lampu Dimatikan (OFF)';
+            iconWrap.className = 'w-11 h-11 rounded-2xl bg-slate-200/80 dark:bg-mocha-surface0 text-slate-500 dark:text-mocha-subtext flex items-center justify-center transition-all';
+            catReaction.textContent = '😴🌙';
+          }
+        } else {
+          log(`Gagal kontrol: ${json.message}`, 'error');
+        }
+      } catch (err) {
+        log(`Error kontrol: ${err.message}`, 'error');
+      }
+    }
+
+    log('NekoIoT Bento Dashboard aktif! Memulai polling sensor...');
+    fetchSensor();
+    fetchHistory();
+    setInterval(fetchSensor, 3000);
+    setInterval(fetchHistory, 5000);
+  </script>
+</body>
+</html>
